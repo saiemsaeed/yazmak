@@ -145,13 +145,10 @@ function CustomEditor({ initialText, config }: CustomEditorProps) {
     setActiveRowIndex(lineIndex);
 
     // Get cursor position from selection
-    setTimeout(() => {
-      const selection = window.getSelection();
-      if (!selection) return;
-      if (selection.rangeCount > 0) {
-        setActiveColumnIndex(selection.anchorOffset);
-      }
-    }, 0);
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
+
+    setActiveColumnIndex(selection.anchorOffset);
   };
 
   return (
