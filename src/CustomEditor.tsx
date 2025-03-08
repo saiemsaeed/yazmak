@@ -153,27 +153,32 @@ function CustomEditor({ initialText, config }: CustomEditorProps) {
 
   return (
     <div id="yazmak-editor" ref={editorRef}>
-      {lines.map((line, index) => (
-        <div
-          className="yazmak-line"
-          key={`yazmak-line-${index}`}
-          ref={(el) => {
-            if (!el) return;
-            lineRefs.current[index] = el;
-          }}
-          contentEditable={true}
-          suppressContentEditableWarning={true}
-          onKeyDown={(e) => handleKeyDown(e, index)}
-          onInput={(e) => handleLineInput(e, index)}
-          onClick={() => handleLineClick(index)}
-          data-line-index={index}
-          spellCheck={false}
-        >
-          {line}
-        </div>
-      ))}
+      <div id="yazmak-editor-content">
+        {lines.map((line, index) => (
+          <div className="yazmak-line">
+            <div className="yazmak-line-number">{index + 1}</div>
+            <div
+              className="yazmak-line-content"
+              key={`yazmak-line-${index}`}
+              ref={(el) => {
+                if (!el) return;
+                lineRefs.current[index] = el;
+              }}
+              contentEditable={true}
+              suppressContentEditableWarning={true}
+              onKeyDown={(e) => handleKeyDown(e, index)}
+              onInput={(e) => handleLineInput(e, index)}
+              onClick={() => handleLineClick(index)}
+              data-line-index={index}
+              spellCheck={false}
+            >
+              {line}
+            </div>
+          </div>
+        ))}
+      </div>
       <div className="status-line">
-        Status: column: {activeColumnIndex} row: {activeRowIndex}
+        Column: {activeColumnIndex} Row: {activeRowIndex}
       </div>
     </div>
   );
