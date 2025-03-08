@@ -29,6 +29,7 @@
   background-color: var(--yazmak-editor-background);
   font-family: var(--yazmak-font-sans);
   font-size: var(--yazmak-heading-4-font-size);
+  white-space: pre-wrap; /* Preserve whitespace */
 }
 .grid-container {
   display: grid;
@@ -63,13 +64,13 @@
 }
 
 .yazmak-line-content {
-  width: 100%;
-  height: var(--line-height-base);
+  height: var(--yazmak-base-line-height);
   position: relative;
   font-size: var(--yazmak-base-font-size);
   outline: none;
   line-height: var(--yazmak-base-line-height);
   padding-left: var(--yazmak-base-padding);
+  white-space: pre-wrap; /* Preserve whitespace */
 }
 
 .status-line {
@@ -81,4 +82,24 @@
   color: var(--yazmak-ui-text-color);
   font-size: var(--yazmak-status-line-height);
   padding-left: var(--yazmak-base-padding);
+}
+
+#yazmak-vim-cursor {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.7);
+  width: 0.6em; /* Width of one character in monospace font */
+  height: 1.2em; /* Height of one line */
+  display: none; /* Initially hidden, will be shown with JS */
+  pointer-events: none; /* Allow clicking through the cursor */
+  z-index: 1;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
 }
