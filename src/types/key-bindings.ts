@@ -4,4 +4,5 @@ export type IKEYBINDINGS = {
   MOVE_LEFT: string;
   MOVE_RIGHT: string;
   NEW_LINE: string;
+  DELETE: string;
 };

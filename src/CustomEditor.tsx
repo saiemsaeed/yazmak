@@ -426,7 +426,9 @@ function CustomEditor({
         ))}
       </div>
       <div className="status-line">
-        Column: {activeColumnIndex} Row: {activeRowIndex}
+        <span>
+          Column: {activeColumnIndex} Row: {activeRowIndex}
+        </span>
       </div>
     </div>
   );
