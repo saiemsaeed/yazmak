@@ -100,7 +100,15 @@ const initialText = `This is the Testing Initial Text
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <div style={{ width: "100vw", height: "100vh" }}>
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alighItems: "center",
+        width: "1000px",
+        height: "100vh",
+      }}
+    >
       <Editor initialText={initialText} />
     </div>
   </StrictMode>,

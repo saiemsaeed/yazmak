@@ -30,6 +30,7 @@
   font-family: var(--yazmak-font-sans);
   font-size: var(--yazmak-heading-4-font-size);
   white-space: pre-wrap; /* Preserve whitespace */
+  position: relative;
 }
 .grid-container {
   display: grid;
@@ -42,6 +43,7 @@
   display: grid;
   grid-template-columns: minmax(30px, auto) 1fr;
   grid-auto-rows: auto;
+  overflow: auto;
 }
 
 .yazmak-line {
@@ -71,16 +73,19 @@
   line-height: var(--yazmak-base-line-height);
   padding-left: var(--yazmak-base-padding);
   white-space: pre-wrap; /* Preserve whitespace */
+  cursor: text;
 }
 
 .status-line {
-  position: fixed;
+  position: absolute;
   bottom: 0;
   width: 100%;
   font-family: var(--yazmak-font-mono);
   background-color: var(--yazmak-ui-background-color);
   color: var(--yazmak-ui-text-color);
   font-size: var(--yazmak-status-line-height);
+}
+.status-line span {
   padding-left: var(--yazmak-base-padding);
 }
 

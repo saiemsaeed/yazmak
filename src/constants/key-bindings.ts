@@ -6,4 +6,5 @@ export const KEY_BINDINGS: IKEYBINDINGS = {
   MOVE_LEFT: "ArrowLeft",
   MOVE_RIGHT: "ArrowRight",
   NEW_LINE: "Enter",
+  DELETE: "Backspace",
 };
