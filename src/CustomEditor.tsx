@@ -1,13 +1,24 @@
 import React, { useEffect, useRef, useState } from "react";
 import { KEY_BINDINGS } from "./constants/key-bindings";
 import "./CustomEditor.css";
+import {
+  handleCreateNewLine,
+  handleDeleteLine,
+  handleMoveDown,
+  handleMoveLeft,
+  handleMoveNextWord,
+  handleMovePrevWord,
+  handleMoveRight,
+  handleMoveUp,
+} from "./helpers/cursor-handler";
+import { createKeyMap } from "./helpers/global";
 
 type Config = {};
 
 type CustomEditorProps = {
   initialText: string;
   config?: {};
-  vimCursor: boolean;
+  vimMode: boolean;
 };
 
 const EDITOR_MODES = {
@@ -18,17 +29,17 @@ const EDITOR_MODES = {
 function CustomEditor({
   initialText,
   config,
-  vimCursor = false,
+  vimMode = false,
 }: CustomEditorProps) {
-  const [lines, setLines] = useState(initialText.split("\n"));
+  const [lines, setLines] = useState<string[]>(initialText.split("\n"));
   const [activeRowIndex, setActiveRowIndex] = useState<number>(0);
   const [activeColumnIndex, setActiveColumnIndex] = useState<number>(0);
   const [isTextSelected, setIsTextSelected] = useState(false);
   const editorRef = useRef(null);
   const lineRefs = useRef<HTMLDivElement[]>([]);
 
-  const updateVimCurosr = (vimCursor: boolean, range: Range) => {
-    if (!vimCursor) return;
+  const updateVimCurosr = (vimMode: boolean, range: Range) => {
+    if (!vimMode) return;
     const charDimensions = getCharacterDimensions(
       range.endContainer,
       range.endOffset,
@@ -74,7 +85,7 @@ function CustomEditor({
         range.setEnd(lineElement, 0);
       }
 
-      updateVimCurosr(vimCursor, range);
+      updateVimCurosr(vimMode, range);
       selection.removeAllRanges();
       selection.addRange(range);
     }
@@ -94,7 +105,8 @@ function CustomEditor({
       const fontSize = parseFloat(parentStyle.fontSize);
       const lineHeight = parseFloat(parentStyle.lineHeight) || fontSize * 1.2;
       height = lineHeight;
-
+      {
+      }
       // Check if we're at the end of the text node
       const isAtEnd = offset >= node.textContent.length;
 
@@ -218,172 +230,69 @@ function CustomEditor({
     setActiveColumnIndex(activeColumnIndex + 1);
   };
 
-  const handleKeyDown = (
-    e: React.KeyboardEvent<HTMLDivElement>,
-    lineIndex: number,
+  const handleChangeCursorPositon = (
+    func: (
+      lines: string[],
+      activeRowIndex: number,
+      activeColumnIndex: number,
+    ) => { rowIndex: number; columnIndex: number; lines: string[] },
   ) => {
-    // Handle Up arrow
-    if (e.key === KEY_BINDINGS.MOVE_UP && lineIndex > 0) {
-      e.preventDefault();
+    const {
+      rowIndex,
+      columnIndex,
+      lines: newLines,
+    } = func(lines, activeRowIndex, activeColumnIndex);
 
-      const newLineLength = lines[lineIndex - 1].length;
-      const newCursorColumnPosition = Math.min(
-        activeColumnIndex,
-        newLineLength,
-      );
+    setActiveRowIndex(rowIndex);
+    setActiveColumnIndex(columnIndex);
 
-      setActiveRowIndex(lineIndex - 1);
-      setActiveColumnIndex(newCursorColumnPosition);
-      return;
-    }
-
-    // Add a function to handle the Enter key
-    if (e.key === KEY_BINDINGS.NEW_LINE) {
-      e.preventDefault();
-
-      const newLines = [...lines];
-      const newLine = newLines[activeRowIndex];
-      const newContent = newLine.slice(0, activeColumnIndex);
-      const remainingContent = newLine.slice(activeColumnIndex);
-
-      newLines[activeRowIndex] = newContent;
-      newLines.splice(activeRowIndex + 1, 0, remainingContent);
-
+    // If lines reference is updated, then we should update lines, otherwise not, to avoid rerenders.
+    if (newLines !== lines) {
       setLines(newLines);
-
-      setActiveRowIndex(activeRowIndex + 1);
-      setActiveColumnIndex(0);
-      return;
     }
+    return;
+  };
 
-    // Handle Backspace key such that on line end it should merge with previous lines
-    // Not sure how to keep it in the KEY_BINDINGS object
-    if (
-      e.key === "Backspace" &&
-      activeColumnIndex === 0 &&
-      activeRowIndex > 0
-    ) {
-      e.preventDefault();
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    // This line is important to prevent the default behavior of the key press
+    e.preventDefault();
 
-      const newLines = [...lines];
-      const newLine = newLines[activeRowIndex];
-      const previousLine = newLines[activeRowIndex - 1];
+    const KEY_PRESSED = createKeyMap(
+      e.key,
+      e.metaKey,
+      e.ctrlKey,
+      e.altKey,
+      e.shiftKey,
+    );
 
-      newLines[activeRowIndex - 1] = previousLine + newLine;
-      newLines.splice(activeRowIndex, 1);
-
-      setLines(newLines);
-
-      setActiveRowIndex(activeRowIndex - 1);
-      setActiveColumnIndex(previousLine.length);
-      return;
-    }
-
-    // Handle Down arrow
-    if (e.key === KEY_BINDINGS.MOVE_DOWN && lineIndex < lines.length - 1) {
-      e.preventDefault();
-
-      const newLineLength = lines[lineIndex + 1].length;
-      const newColumnPosition = Math.min(activeColumnIndex, newLineLength);
-
-      setActiveRowIndex(lineIndex + 1);
-      setActiveColumnIndex(newColumnPosition);
-      return;
-    }
-
-    // handle move word forward with option key + right arrow
-    if (e.key === KEY_BINDINGS.MOVE_RIGHT && e.altKey) {
-      e.preventDefault();
-
-      let newRowIndex = activeRowIndex;
-      let newColumnIndex = activeColumnIndex;
-      const currentLine = lines[activeRowIndex];
-
-      if (
-        activeColumnIndex === currentLine.length &&
-        activeRowIndex < lines.length - 1
-      ) {
-        newRowIndex = activeRowIndex + 1;
-        newColumnIndex = 0;
-      } else {
-        newColumnIndex = currentLine.indexOf(" ", activeColumnIndex + 1);
-
-        if (newColumnIndex === -1) {
-          newColumnIndex = currentLine.length;
+    switch (KEY_PRESSED) {
+      case KEY_BINDINGS.MOVE_UP:
+        handleChangeCursorPositon(handleMoveUp);
+        break;
+      case KEY_BINDINGS.MOVE_DOWN:
+        handleChangeCursorPositon(handleMoveDown);
+        break;
+      case KEY_BINDINGS.NEW_LINE:
+        handleChangeCursorPositon(handleCreateNewLine);
+        break;
+      case KEY_BINDINGS.DELETE_LINE:
+        if (activeColumnIndex != 0) {
+          handleChangeCursorPositon(handleDeleteLine);
+          break;
         }
-      }
-
-      setActiveRowIndex(newRowIndex);
-      setActiveColumnIndex(newColumnIndex);
-      return;
-    }
-
-    // handle move word backward with option key + left arrow
-    if (e.key === KEY_BINDINGS.MOVE_LEFT && e.altKey) {
-      e.preventDefault();
-
-      let newRowIndex = activeRowIndex;
-      let newColumnIndex = activeColumnIndex;
-      const currentLine = lines[activeRowIndex];
-
-      if (activeColumnIndex === 0 && activeRowIndex > 0) {
-        newRowIndex = activeRowIndex - 1;
-        newColumnIndex = lines[newRowIndex].length;
-      } else {
-        newColumnIndex = currentLine.lastIndexOf(" ", activeColumnIndex - 1);
-
-        if (newColumnIndex === -1) {
-          newColumnIndex = 0;
-        }
-      }
-
-      setActiveRowIndex(newRowIndex);
-      setActiveColumnIndex(newColumnIndex);
-      return;
-    }
-
-    if (e.key === KEY_BINDINGS.MOVE_LEFT) {
-      e.preventDefault();
-
-      let newRowIndex = activeRowIndex;
-      let newColumnIndex = activeColumnIndex;
-
-      if (newColumnIndex === 0 && newRowIndex === 0) {
-        return;
-      }
-
-      // handle if the cursor is at the beginning of the line and its not first line
-      if (activeColumnIndex === 0 && activeRowIndex > 0) {
-        newRowIndex = activeRowIndex - 1;
-        newColumnIndex = lines[newRowIndex].length;
-      } else {
-        newColumnIndex = activeColumnIndex - 1;
-      }
-
-      setActiveRowIndex(newRowIndex);
-      setActiveColumnIndex(newColumnIndex);
-      return;
-    }
-
-    if (e.key === KEY_BINDINGS.MOVE_RIGHT) {
-      e.preventDefault();
-
-      let newRowIndex = activeRowIndex;
-      let newColumnIndex = activeColumnIndex;
-      // handle if the cursor is at the end of the line
-      if (
-        activeColumnIndex === lines[activeRowIndex].length &&
-        lineIndex < lines.length - 1
-      ) {
-        newRowIndex = activeRowIndex + 1;
-        newColumnIndex = 0;
-      } else if (activeColumnIndex < lines[activeRowIndex].length) {
-        newColumnIndex = activeColumnIndex + 1;
-      }
-
-      setActiveRowIndex(newRowIndex);
-      setActiveColumnIndex(newColumnIndex);
-      return;
+      case KEY_BINDINGS.MOVE_LEFT:
+        handleChangeCursorPositon(handleMoveLeft);
+        break;
+      case KEY_BINDINGS.MOVE_RIGHT:
+        handleChangeCursorPositon(handleMoveRight);
+      case KEY_BINDINGS.MOVE_NEXT_WORD:
+        handleChangeCursorPositon(handleMoveNextWord);
+        break;
+      case KEY_BINDINGS.MOVE_PREV_WORD:
+        handleChangeCursorPositon(handleMovePrevWord);
+        break;
+      default:
+        break;
     }
   };
 
