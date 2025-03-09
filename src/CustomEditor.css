@@ -27,7 +27,7 @@
   width: 100%;
   height: 100%;
   background-color: var(--yazmak-editor-background);
-  font-family: var(--yazmak-font-sans);
+  font-family: var(--yazmak-font-mono);
   font-size: var(--yazmak-heading-4-font-size);
   white-space: pre-wrap; /* Preserve whitespace */
   position: relative;
