@@ -285,6 +285,7 @@ function CustomEditor({
         break;
       case KEY_BINDINGS.MOVE_RIGHT:
         handleChangeCursorPositon(handleMoveRight);
+        break;
       case KEY_BINDINGS.MOVE_NEXT_WORD:
         handleChangeCursorPositon(handleMoveNextWord);
         break;
@@ -323,7 +324,7 @@ function CustomEditor({
               }}
               contentEditable={true}
               suppressContentEditableWarning={true}
-              onKeyDown={(e) => handleKeyDown(e, index)}
+              onKeyDown={(e) => handleKeyDown(e)}
               onInput={(e) => handleLineInput(e, index)}
               onClick={() => handleLineClick(index)}
               data-line-index={index}
