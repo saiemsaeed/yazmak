@@ -105,11 +105,22 @@ createRoot(document.getElementById("root")).render(
         display: "flex",
         justifyContent: "center",
         alighItems: "center",
-        width: "1000px",
+        width: "100vw",
         height: "100vh",
       }}
     >
-      <Editor initialText={initialText} />
+      <div
+        style={{
+          width: "750px",
+          marginTop: "8px",
+          marginBottom: "8px",
+          borderRadius: "4px",
+          boxShadow: "0 0 0 1px rgba(16,22,26,.1), 0 2px 4px rgba(16,22,26,.2)",
+          overflow: "hidden",
+        }}
+      >
+        <Editor initialText={initialText} />
+      </div>
     </div>
   </StrictMode>,
 );
