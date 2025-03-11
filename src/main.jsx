@@ -1,7 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import "./index.css";
 import Editor from "./CustomEditor";
+import "./index.css";
 
 const initialText = `This is the Testing Initial Text
 ## This is the Heading 2

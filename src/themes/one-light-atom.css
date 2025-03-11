@@ -1,0 +1,40 @@
+:root {
+  /* Main colors */
+  --yazmak-editor-background: #fafafa;
+  --yazmak-editor-text-color: #383a42;
+  --yazmak-active-color: #4078f2;
+  --yazmak-font-sans: "Inter", sans-serif;
+  --yazmak-font-mono: "JetBrains Mono", monospace;
+
+  /* Font sizes */
+  --yazmak-base-font-size: 1rem;
+  --yazmak-heading-1-font-size: 2.5rem;
+  --yazmak-heading-2-font-size: 2rem;
+  --yazmak-heading-3-font-size: 1.75rem;
+  --yazmak-heading-4-font-size: 1.5rem;
+  --yazmak-heading-5-font-size: 1.25rem;
+  --yazmak-heading-6-font-size: 1rem;
+
+  /* UI measurements */
+  --yazmak-status-line-height: 18px;
+  --yazmak-base-padding: 0.5rem;
+  --yazmak-base-line-height: 1.5;
+
+  /* UI colors */
+  --yazmak-ui-background-color: #e5e5e6;
+  --yazmak-ui-text-color: #696c77;
+
+  /* Optional: Syntax highlighting colors for code blocks */
+  --yazmak-syntax-red: #e45649;
+  --yazmak-syntax-green: #50a14f;
+  --yazmak-syntax-yellow: #c18401;
+  --yazmak-syntax-blue: #4078f2;
+  --yazmak-syntax-purple: #a626a4;
+  --yazmak-syntax-cyan: #0184bc;
+  --yazmak-syntax-gray: #a0a1a7;
+
+  /* Optional: Selection and cursor colors */
+  --yazmak-selection-background: #e5e5e6;
+  --yazmak-cursor-color: #526fff;
+  --yazmak-indent-guide-color: #d3d4d5;
+}

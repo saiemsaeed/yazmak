@@ -37,6 +37,7 @@ function CustomEditor({
   const [isTextSelected, setIsTextSelected] = useState(false);
   const editorRef = useRef(null);
   const lineRefs = useRef<HTMLDivElement[]>([]);
+  const [editorMode, setEditorMode] = useState(EDITOR_MODES.NORMAL);
 
   const updateVimCurosr = (vimMode: boolean, range: Range) => {
     if (!vimMode) return;
@@ -227,7 +228,10 @@ function CustomEditor({
 
     setLines(newLines);
 
-    setActiveColumnIndex(activeColumnIndex + 1);
+    const selection = window.getSelection();
+    if (!selection) return;
+
+    setActiveColumnIndex(selection.anchorOffset);
   };
 
   const handleChangeCursorPositon = (
@@ -254,9 +258,6 @@ function CustomEditor({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    // This line is important to prevent the default behavior of the key press
-    e.preventDefault();
-
     const KEY_PRESSED = createKeyMap(
       e.key,
       e.metaKey,
@@ -265,35 +266,60 @@ function CustomEditor({
       e.shiftKey,
     );
 
+    // Handle special key bindings
     switch (KEY_PRESSED) {
       case KEY_BINDINGS.MOVE_UP:
+        e.preventDefault();
         handleChangeCursorPositon(handleMoveUp);
-        break;
+        return;
       case KEY_BINDINGS.MOVE_DOWN:
+        e.preventDefault();
         handleChangeCursorPositon(handleMoveDown);
-        break;
+        return;
       case KEY_BINDINGS.NEW_LINE:
+        e.preventDefault();
         handleChangeCursorPositon(handleCreateNewLine);
-        break;
+        return;
       case KEY_BINDINGS.DELETE_LINE:
-        if (activeColumnIndex != 0) {
+        if (activeColumnIndex == 0) {
+          e.preventDefault();
           handleChangeCursorPositon(handleDeleteLine);
-          break;
         }
+        return;
       case KEY_BINDINGS.MOVE_LEFT:
+        e.preventDefault();
         handleChangeCursorPositon(handleMoveLeft);
-        break;
+        return;
       case KEY_BINDINGS.MOVE_RIGHT:
+        e.preventDefault();
         handleChangeCursorPositon(handleMoveRight);
-        break;
+        return;
       case KEY_BINDINGS.MOVE_NEXT_WORD:
+        e.preventDefault();
         handleChangeCursorPositon(handleMoveNextWord);
-        break;
+        return;
       case KEY_BINDINGS.MOVE_PREV_WORD:
+        e.preventDefault();
         handleChangeCursorPositon(handleMovePrevWord);
-        break;
+        return;
+      case KEY_BINDINGS.CHANGE_MODE_NORMAL:
+        e.preventDefault();
+        setEditorMode(EDITOR_MODES.NORMAL);
+        return;
+      case KEY_BINDINGS.CHANGE_MODE_INSERT:
+        e.preventDefault();
+        setEditorMode(EDITOR_MODES.INSERT);
+        return;
       default:
-        break;
+        // For normal keys, let the default behavior occur to allow text input
+        if (editorMode === EDITOR_MODES.INSERT) {
+          // Allow text input in INSERT mode
+          return;
+        } else {
+          // Prevent text input in NORMAL mode
+          e.preventDefault();
+          return;
+        }
     }
   };
 
@@ -337,7 +363,7 @@ function CustomEditor({
       </div>
       <div className="status-line">
         <span>
-          Column: {activeColumnIndex} Row: {activeRowIndex}
+          {editorMode} | Column: {activeColumnIndex} Row: {activeRowIndex}
         </span>
       </div>
     </div>
