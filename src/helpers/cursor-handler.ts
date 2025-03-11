@@ -58,7 +58,7 @@ const handleDeleteLine = (
   activeRowIndex: number,
   activeColumnIndex: number,
 ): CursorHandlerReturnType => {
-  const newRowIndex = Math.min(0, activeRowIndex - 1);
+  const newRowIndex = Math.max(0, activeRowIndex - 1);
   const newRows = [...lines];
   const newRow = newRows[newRowIndex];
   const lastRow = newRows[activeRowIndex];

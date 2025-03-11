@@ -11,4 +11,6 @@ export const KEY_BINDINGS: IKEYBINDINGS = {
   MOVE_PREV_WORD: "Alt+ArrowLeft",
   MOVE_START_LINE: "Home",
   MOVE_END_LINE: "End",
+  CHANGE_MODE_NORMAL: "Escape",
+  CHANGE_MODE_INSERT: "i",
 };

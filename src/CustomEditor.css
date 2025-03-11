@@ -1,25 +1,5 @@
-:root {
-  --yazmak-editor-background: #282828;
-  --yazmak-editor-text-color: #fbf1c7;
-  --yazmak-active-color: #fabd2f;
-  --yazmak-font-sans: "Inter", sans-serif;
-  --yazmak-font-mono: "JetBrains Mono", monospace;
-
-  --yazmak-base-font-size: 1rem;
-
-  --yazmak-heading-1-font-size: 2.5rem;
-  --yazmak-heading-2-font-size: 2rem;
-  --yazmak-heading-3-font-size: 1.75rem;
-  --yazmak-heading-4-font-size: 1.5rem;
-  --yazmak-heading-5-font-size: 1.25rem;
-  --yazmak-heading-6-font-size: 1rem;
-
-  --yazmak-status-line-height: 18px;
-  --yazmak-base-padding: 0.5rem;
-  --yazmak-ui-background-color: #665c54;
-  --yazmak-ui-text-color: #bdae93;
-  --yazmak-base-line-height: 1.5;
-}
+@import url("./themes/default-gruvbox.css");
+/* @import url("./themes/one-light-atom.css"); */
 
 #yazmak-editor {
   display: flex;
@@ -27,6 +7,7 @@
   width: 100%;
   height: 100%;
   background-color: var(--yazmak-editor-background);
+  color: var(--yazmak-editor-text-color);
   font-family: var(--yazmak-font-mono);
   font-size: var(--yazmak-heading-4-font-size);
   white-space: pre-wrap; /* Preserve whitespace */
@@ -77,8 +58,6 @@
 }
 
 .status-line {
-  position: absolute;
-  bottom: 0;
   width: 100%;
   font-family: var(--yazmak-font-mono);
   background-color: var(--yazmak-ui-background-color);

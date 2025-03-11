@@ -9,4 +9,6 @@ export type IKEYBINDINGS = {
   MOVE_PREV_WORD: string;
   MOVE_START_LINE: string;
   MOVE_END_LINE: string;
+  CHANGE_MODE_NORMAL: string;
+  CHANGE_MODE_INSERT: string;
 };
