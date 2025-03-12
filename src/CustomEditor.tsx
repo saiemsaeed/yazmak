@@ -13,11 +13,13 @@ import {
 } from "./helpers/cursor-handler";
 import { createKeyMap } from "./helpers/global";
 
-type Config = {};
+type Config = {
+  showLineNumbers: boolean;
+};
 
 type CustomEditorProps = {
   initialText: string;
-  config?: {};
+  config?: Config;
   vimMode: boolean;
 };
 
@@ -28,9 +30,10 @@ const EDITOR_MODES = {
 
 function CustomEditor({
   initialText,
-  config,
+  config = { showLineNumbers: false },
   vimMode = false,
 }: CustomEditorProps) {
+  const { showLineNumbers } = config;
   const [lines, setLines] = useState<string[]>(initialText.split("\n"));
   const [activeRowIndex, setActiveRowIndex] = useState<number>(0);
   const [activeColumnIndex, setActiveColumnIndex] = useState<number>(0);
@@ -340,7 +343,10 @@ function CustomEditor({
         <div id="yazmak-vim-cursor" />
         {lines.map((line, index) => (
           <div className="yazmak-line">
-            <div className="yazmak-line-number">{index + 1}</div>
+            {showLineNumbers && (
+              <div className="yazmak-line-number">{index + 1}</div>
+            )}
+
             <div
               className="yazmak-line-content"
               key={`yazmak-line-${index}`}

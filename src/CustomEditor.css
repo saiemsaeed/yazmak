@@ -22,9 +22,14 @@
 
 #yazmak-editor-content {
   display: grid;
-  grid-template-columns: minmax(30px, auto) 1fr;
+  grid-template-columns: [ln-col] minmax(0, auto) [content-col] 1fr;
   grid-auto-rows: auto;
   overflow: auto;
+}
+
+/* When line numbers are present, ensure minimum width */
+#yazmak-editor-content:has(.yazmak-line-number) {
+  grid-template-columns: [ln-col] minmax(30px, auto) [content-col] 1fr;
 }
 
 .yazmak-line {
@@ -44,6 +49,7 @@
   font-size: var(--yazmak-base-font-size);
   background-color: var(--yazmak-ui-background-color);
   padding: 0 4px;
+  grid-column: ln-col;
 }
 
 .yazmak-line-content {
@@ -55,6 +61,7 @@
   padding-left: var(--yazmak-base-padding);
   white-space: pre-wrap; /* Preserve whitespace */
   cursor: text;
+  grid-column: content-col;
 }
 
 .status-line {
