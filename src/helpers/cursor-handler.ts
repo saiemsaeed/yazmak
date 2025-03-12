@@ -182,6 +182,76 @@ const handleMovePrevWord = (
   };
 };
 
+const handleDeleteWordBackwards = (
+  lines: string[],
+  activeRowIndex: number,
+  activeColumnIndex: number,
+): CursorHandlerReturnType => {
+  let newRowIndex = activeRowIndex;
+  let newColumnIndex = activeColumnIndex;
+  const currentLine = lines[activeRowIndex];
+
+  //handle if the cursor is at the beginning of the line
+  if (activeColumnIndex === 0 && activeRowIndex > 0) {
+    newRowIndex = activeRowIndex - 1;
+    newColumnIndex = lines[newRowIndex].length;
+  } else {
+    //handle normal cursor position
+    const lastSpaceIndex = currentLine.lastIndexOf(" ", activeColumnIndex - 2);
+
+    lines[activeRowIndex] =
+      currentLine.slice(0, lastSpaceIndex + 1) +
+      currentLine.slice(activeColumnIndex);
+    newColumnIndex = lastSpaceIndex + 1;
+  }
+
+  return {
+    rowIndex: newRowIndex,
+    columnIndex: newColumnIndex,
+    lines,
+  };
+};
+
+const handleDeleteWordForward = (
+  lines: string[],
+  activeRowIndex: number,
+  activeColumnIndex: number,
+): CursorHandlerReturnType => {
+  let newRowIndex = activeRowIndex;
+  let newColumnIndex = activeColumnIndex;
+  const currentLine = lines[activeRowIndex];
+  const newLines = [...lines];
+
+  //handle if the cursor is at the end of the line
+  if (
+    activeColumnIndex === currentLine.length &&
+    activeRowIndex < lines.length - 1
+  ) {
+    const nextLine = newLines[activeRowIndex + 1];
+    newLines[activeRowIndex] = currentLine + nextLine;
+    newLines.splice(activeRowIndex + 1, 1);
+  } else {
+    //handle normal cursor position
+    let nextSpaceIndex = currentLine.indexOf(" ", activeColumnIndex + 1);
+
+    if (nextSpaceIndex === -1) {
+      nextSpaceIndex = currentLine.length;
+    }
+
+    newLines[activeRowIndex] =
+      currentLine.slice(0, activeColumnIndex) +
+      currentLine.slice(nextSpaceIndex);
+
+    newColumnIndex = activeColumnIndex;
+  }
+
+  return {
+    rowIndex: newRowIndex,
+    columnIndex: newColumnIndex,
+    lines: newLines,
+  };
+};
+
 export {
   handleMoveUp,
   handleMoveDown,
@@ -191,4 +261,6 @@ export {
   handleMoveRight,
   handleMoveNextWord,
   handleMovePrevWord,
+  handleDeleteWordBackwards,
+  handleDeleteWordForward,
 };
