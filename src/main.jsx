@@ -119,7 +119,12 @@ createRoot(document.getElementById("root")).render(
           overflow: "hidden",
         }}
       >
-        <Editor initialText={initialText} />
+        <Editor
+          initialText={initialText}
+          config={{
+            showLineNumbers: true,
+          }}
+        />
       </div>
     </div>
   </StrictMode>,
