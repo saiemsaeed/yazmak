@@ -11,4 +11,6 @@ export type IKEYBINDINGS = {
   MOVE_END_LINE: string;
   CHANGE_MODE_NORMAL: string;
   CHANGE_MODE_INSERT: string;
+  DELETE_WORD_BACKWARDS: string;
+  DELETE_WORD_FORWARD: string;
 };

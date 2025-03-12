@@ -13,4 +13,6 @@ export const KEY_BINDINGS: IKEYBINDINGS = {
   MOVE_END_LINE: "End",
   CHANGE_MODE_NORMAL: "Escape",
   CHANGE_MODE_INSERT: "i",
+  DELETE_WORD_BACKWARDS: "Alt+Backspace",
+  DELETE_WORD_FORWARD: "Alt+Delete",
 };

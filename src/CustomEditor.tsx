@@ -4,6 +4,8 @@ import "./CustomEditor.css";
 import {
   handleCreateNewLine,
   handleDeleteLine,
+  handleDeleteWordBackwards,
+  handleDeleteWordForward,
   handleMoveDown,
   handleMoveLeft,
   handleMoveNextWord,
@@ -312,6 +314,14 @@ function CustomEditor({
       case KEY_BINDINGS.CHANGE_MODE_INSERT:
         e.preventDefault();
         setEditorMode(EDITOR_MODES.INSERT);
+        return;
+      case KEY_BINDINGS.DELETE_WORD_BACKWARDS:
+        e.preventDefault();
+        handleChangeCursorPositon(handleDeleteWordBackwards);
+        return;
+      case KEY_BINDINGS.DELETE_WORD_FORWARD:
+        e.preventDefault();
+        handleChangeCursorPositon(handleDeleteWordForward);
         return;
       default:
         // For normal keys, let the default behavior occur to allow text input
