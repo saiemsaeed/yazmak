@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { KEY_BINDINGS } from "./constants/key-bindings";
 import "./CustomEditor.css";
 import {
@@ -14,15 +14,17 @@ import {
   handleMoveUp,
 } from "./helpers/cursor-handler";
 import { createKeyMap } from "./helpers/global";
+import { copyToClipboard, pasteFromClipboard } from "./helpers/clipboard";
+import { handleSelectAll } from "./helpers/selection";
 
 type Config = {
   showLineNumbers: boolean;
+  vimMode: boolean;
 };
 
 type CustomEditorProps = {
   initialText: string;
   config?: Config;
-  vimMode: boolean;
 };
 
 const EDITOR_MODES = {
@@ -32,196 +34,109 @@ const EDITOR_MODES = {
 
 function CustomEditor({
   initialText,
-  config = { showLineNumbers: false },
-  vimMode = false,
+  config = { showLineNumbers: false, vimMode: false },
 }: CustomEditorProps) {
   const { showLineNumbers } = config;
   const [lines, setLines] = useState<string[]>(initialText.split("\n"));
   const [activeRowIndex, setActiveRowIndex] = useState<number>(0);
   const [activeColumnIndex, setActiveColumnIndex] = useState<number>(0);
-  const [isTextSelected, setIsTextSelected] = useState(false);
-  const editorRef = useRef(null);
+  const editorRef = useRef<HTMLDivElement>(null);
   const lineRefs = useRef<HTMLDivElement[]>([]);
-  const [editorMode, setEditorMode] = useState(EDITOR_MODES.NORMAL);
+  const lineNumberRefs = useRef<HTMLDivElement[]>([]);
+  const [editorMode, setEditorMode] = useState(EDITOR_MODES.INSERT);
+  const [selectionRange, setSelectionRange] = useState<Range | null>(null);
 
-  const updateVimCurosr = (vimMode: boolean, range: Range) => {
-    if (!vimMode) return;
-    const charDimensions = getCharacterDimensions(
-      range.endContainer,
-      range.endOffset,
-    );
-    const rect = range.getBoundingClientRect();
-    const cursor = document.getElementById("yazmak-vim-cursor");
-    // Position the cursor element
-    if (cursor) {
-      cursor.style.left = `${rect.left}px`;
-      cursor.style.top = `${rect.top - 2}px`;
-      cursor.style.width = `${charDimensions.width}px`;
-      cursor.style.height = `${charDimensions.height}px`;
+  // Focus cursor at the end of content when editor initializes
+  useLayoutEffect(() => {
+    if (editorRef.current && lines.length > 0) {
+      // Find the last line with content
+      let lastLineWithContentIndex = lines.length - 1;
+      while (
+        lastLineWithContentIndex >= 0 &&
+        !lines[lastLineWithContentIndex]
+      ) {
+        lastLineWithContentIndex--;
+      }
+
+      // If all lines are empty, use the first line
+      const targetLineIndex = Math.max(0, lastLineWithContentIndex);
+      const targetColumnIndex = lines[targetLineIndex]?.length || 0;
+
+      // Update cursor position
+      setActiveRowIndex(targetLineIndex);
+      setActiveColumnIndex(targetColumnIndex);
     }
+  }, []);
+
+  // Maintain Minimum Number of Lines (50)
+  // Improve it by moving to a function and calling it when needed
+  useLayoutEffect(() => {
+    if (lines.length < 50) {
+      const newLines = [...lines];
+      for (let i = lines.length; i < 50; i++) {
+        newLines.push("");
+      }
+      setLines(newLines);
+    }
+  }, [lines]);
+
+  const isTextSelected = () => {
+    const selection = window.getSelection();
+    return selection ? selection.toString() !== "" : false;
   };
 
   useEffect(() => {
-    if (!isTextSelected && lineRefs.current[activeRowIndex]) {
-      const lineElement = lineRefs.current[activeRowIndex];
+    const activeLineRef = lineRefs.current[activeRowIndex];
+    const activeLineNumberRef = lineNumberRefs.current[activeRowIndex];
 
-      if (!lineElement) return;
+    // Remove active line class from all Lines
+    lineRefs.current.forEach((lineRef) =>
+      lineRef.classList.remove("yazmak-active-line"),
+    );
 
-      // Create the cursor element
+    // Remove active line class from all Line numbers
+    lineNumberRefs.current.forEach((lineNumberRef) =>
+      lineNumberRef.classList.remove("yazmak-active-line"),
+    );
 
+    activeLineRef.classList.add("yazmak-active-line");
+    activeLineNumberRef.classList.add("yazmak-active-line");
+  }, [activeRowIndex]);
+
+  useEffect(() => {
+    const selection = window.getSelection();
+    if (!selection) return;
+
+    const activeLineRef = lineRefs.current[activeRowIndex];
+
+    if (!isTextSelected() && activeLineRef) {
       // Focus the line
-      lineElement.focus();
+      activeLineRef.focus();
 
       // Set cursor position
       const selection = window.getSelection();
       if (!selection) return;
       const range = document.createRange();
 
-      if (lineElement.textContent && lineElement.firstChild) {
+      if (activeLineRef.textContent && activeLineRef.firstChild) {
         // If there's text content
         const position = Math.min(
           activeColumnIndex,
-          lineElement.textContent.length || 0,
+          activeLineRef.textContent.length || 0,
         );
-        range.setStart(lineElement.firstChild, position);
-        range.setEnd(lineElement.firstChild, position);
+
+        range.setStart(activeLineRef.firstChild, position);
+        range.setEnd(activeLineRef.firstChild, position);
       } else {
         // If there's no text content
-        range.setStart(lineElement, 0);
-        range.setEnd(lineElement, 0);
+        range.setStart(activeLineRef, 0);
+        range.setEnd(activeLineRef, 0);
       }
 
-      updateVimCurosr(vimMode, range);
       selection.removeAllRanges();
       selection.addRange(range);
     }
-  }, [activeRowIndex, activeColumnIndex, lines, isTextSelected]);
-
-  function getCharacterDimensions(node, offset) {
-    // Default dimensions
-    let width = 0;
-    let height = 0;
-
-    // Handle text nodes
-    if (node.nodeType === Node.TEXT_NODE) {
-      // Get the parent element's computed style
-      const parentStyle = window.getComputedStyle(node.parentNode);
-
-      // Get the font metrics
-      const fontSize = parseFloat(parentStyle.fontSize);
-      const lineHeight = parseFloat(parentStyle.lineHeight) || fontSize * 1.2;
-      height = lineHeight;
-      {
-      }
-      // Check if we're at the end of the text node
-      const isAtEnd = offset >= node.textContent.length;
-
-      // Check if we're on a whitespace character
-      const isWhitespace =
-        !isAtEnd && /\s/.test(node.textContent.charAt(offset));
-
-      // Create a temporary span to measure character width
-      const tempSpan = document.createElement("span");
-      tempSpan.style.visibility = "hidden";
-      tempSpan.style.position = "absolute";
-
-      // Copy all text-related styles
-      for (const prop of [
-        "font",
-        "fontFamily",
-        "fontSize",
-        "fontWeight",
-        "fontStyle",
-        "letterSpacing",
-      ]) {
-        tempSpan.style[prop] = parentStyle[prop];
-      }
-
-      if (isAtEnd || isWhitespace) {
-        // For whitespace or end of text, measure a standard character first
-        tempSpan.textContent = "M";
-        document.body.appendChild(tempSpan);
-        width = tempSpan.getBoundingClientRect().width;
-        document.body.removeChild(tempSpan);
-
-        // If it's a space, adjust the width
-        if (!isAtEnd && node.textContent.charAt(offset) === " ") {
-          // Create another span to measure space width
-          const spaceSpan = document.createElement("span");
-          spaceSpan.style.visibility = "hidden";
-          spaceSpan.style.position = "absolute";
-          for (const prop of [
-            "font",
-            "fontFamily",
-            "fontSize",
-            "fontWeight",
-            "fontStyle",
-            "letterSpacing",
-          ]) {
-            spaceSpan.style[prop] = parentStyle[prop];
-          }
-
-          // Measure the width of text with and without a space
-          spaceSpan.textContent = "a";
-          document.body.appendChild(spaceSpan);
-          const widthWithoutSpace = spaceSpan.getBoundingClientRect().width;
-
-          spaceSpan.textContent = "a ";
-          const widthWithSpace = spaceSpan.getBoundingClientRect().width;
-
-          document.body.removeChild(spaceSpan);
-
-          // The space width is the difference
-          width = widthWithSpace - widthWithoutSpace;
-
-          // Ensure minimum width for visibility
-          width = Math.max(width, fontSize * 0.25);
-        }
-
-        // For tab characters, make the cursor wider
-        if (!isAtEnd && node.textContent.charAt(offset) === "\t") {
-          width *= 4; // Typical tab size is 4 spaces
-        }
-      } else {
-        // For normal visible characters, use the actual character
-        tempSpan.textContent = node.textContent.charAt(offset);
-        document.body.appendChild(tempSpan);
-        width = tempSpan.getBoundingClientRect().width;
-        document.body.removeChild(tempSpan);
-      }
-    } else {
-      // For element nodes
-      const style = window.getComputedStyle(node);
-      const fontSize = parseFloat(style.fontSize);
-      height = parseFloat(style.lineHeight) || fontSize * 1.2;
-
-      // For empty elements or cursor at the end
-      const tempSpan = document.createElement("span");
-      for (const prop of [
-        "font",
-        "fontFamily",
-        "fontSize",
-        "fontWeight",
-        "fontStyle",
-        "letterSpacing",
-      ]) {
-        tempSpan.style[prop] = style[prop];
-      }
-
-      tempSpan.textContent = "M";
-      tempSpan.style.visibility = "hidden";
-      tempSpan.style.position = "absolute";
-
-      document.body.appendChild(tempSpan);
-      width = tempSpan.getBoundingClientRect().width;
-      document.body.removeChild(tempSpan);
-    }
-
-    // Ensure minimum width
-    width = Math.max(width, 1);
-
-    return { width, height };
-  }
+  }, [activeRowIndex, activeColumnIndex, lines]);
 
   const handleLineInput = (
     e: React.FormEvent<HTMLDivElement>,
@@ -241,6 +156,7 @@ function CustomEditor({
 
   const handleChangeCursorPositon = (
     func: (
+      lineRefs: HTMLDivElement[],
       lines: string[],
       activeRowIndex: number,
       activeColumnIndex: number,
@@ -250,7 +166,7 @@ function CustomEditor({
       rowIndex,
       columnIndex,
       lines: newLines,
-    } = func(lines, activeRowIndex, activeColumnIndex);
+    } = func(lineRefs.current, lines, activeRowIndex, activeColumnIndex);
 
     setActiveRowIndex(rowIndex);
     setActiveColumnIndex(columnIndex);
@@ -285,10 +201,18 @@ function CustomEditor({
         e.preventDefault();
         handleChangeCursorPositon(handleCreateNewLine);
         return;
-      case KEY_BINDINGS.DELETE_LINE:
+      case KEY_BINDINGS.DELETE:
         if (activeColumnIndex == 0) {
           e.preventDefault();
           handleChangeCursorPositon(handleDeleteLine);
+        } else if (isTextSelected()) {
+          e.preventDefault();
+          const selection = window.getSelection();
+          if (!selection) return;
+
+          const range = selection.getRangeAt(0);
+          range.deleteContents();
+          editorRef.current?.setAttribute("contentEditable", "false");
         }
         return;
       case KEY_BINDINGS.MOVE_LEFT:
@@ -307,11 +231,13 @@ function CustomEditor({
         e.preventDefault();
         handleChangeCursorPositon(handleMovePrevWord);
         return;
-      case KEY_BINDINGS.CHANGE_MODE_NORMAL:
+      case KEY_BINDINGS.CHANGE_MODE_NORMAL &&
+        editorMode === EDITOR_MODES.INSERT:
         e.preventDefault();
         setEditorMode(EDITOR_MODES.NORMAL);
         return;
-      case KEY_BINDINGS.CHANGE_MODE_INSERT:
+      case KEY_BINDINGS.CHANGE_MODE_INSERT &&
+        editorMode === EDITOR_MODES.NORMAL:
         e.preventDefault();
         setEditorMode(EDITOR_MODES.INSERT);
         return;
@@ -323,42 +249,143 @@ function CustomEditor({
         e.preventDefault();
         handleChangeCursorPositon(handleDeleteWordForward);
         return;
+      case KEY_BINDINGS.SELECT_ALL:
+        e.preventDefault();
+        handleChangeCursorPositon(handleSelectAll);
+        return;
+      case KEY_BINDINGS.COPY:
+        e.preventDefault();
+        copyToClipboard();
+        return;
+      case KEY_BINDINGS.PASTE:
+        e.preventDefault();
+        pasteFromClipboard().then((newLines) => {
+          if (newLines && newLines.length > 0) {
+            setLines((prevLines) => {
+              const updatedLines = [...prevLines];
+
+              // Handle the first line of the paste - insert at cursor position in current line
+              const currentLine = updatedLines[activeRowIndex] || "";
+              const beforeCursor = currentLine.substring(0, activeColumnIndex);
+              const afterCursor = currentLine.substring(activeColumnIndex);
+
+              // Replace current line with: text before cursor + first pasted line
+              updatedLines[activeRowIndex] = beforeCursor + newLines[0];
+
+              // If there are multiple lines being pasted
+              if (newLines.length > 1) {
+                // Insert the middle lines
+                const middleLines = newLines.slice(1, newLines.length - 1);
+
+                // Insert the last line + remainder of the current line
+                const lastPastedLine =
+                  newLines[newLines.length - 1] + afterCursor;
+
+                // Insert all new lines at the right position
+                updatedLines.splice(
+                  activeRowIndex + 1,
+                  0,
+                  ...middleLines,
+                  lastPastedLine,
+                );
+              } else {
+                // Single line paste - append the remainder of the original line
+                updatedLines[activeRowIndex] += afterCursor;
+              }
+
+              // Update cursor position to end of pasted content
+              setTimeout(() => {
+                if (newLines.length > 1) {
+                  // Move to the end of the last pasted line
+                  setActiveRowIndex(activeRowIndex + newLines.length - 1);
+                  setActiveColumnIndex(newLines[newLines.length - 1].length);
+                } else {
+                  // Stay on same line, but move cursor forward
+                  setActiveColumnIndex(activeColumnIndex + newLines[0].length);
+                }
+              }, 0);
+
+              return updatedLines;
+            });
+          }
+        });
+        return;
       default:
-        // For normal keys, let the default behavior occur to allow text input
-        if (editorMode === EDITOR_MODES.INSERT) {
-          // Allow text input in INSERT mode
-          return;
-        } else {
-          // Prevent text input in NORMAL mode
-          e.preventDefault();
-          return;
-        }
+        return;
     }
   };
 
-  // Handle click on a line
-  const handleLineClick = (lineIndex: number) => {
+  const handleMouseDown = (e: React.MouseEvent, lineIndex: number) => {
+    editorRef.current?.setAttribute("contentEditable", "true");
+  };
+
+  const handleMouseUp = (e: React.MouseEvent, lineIndex: number) => {
+    editorRef.current?.setAttribute("contentEditable", "false");
+    const selection = window.getSelection();
+    if (!selection) {
+      return;
+    }
+
     setActiveRowIndex(lineIndex);
+    setActiveColumnIndex(selection.focusOffset);
+  };
+
+  const handleLineClick = (e: React.MouseEvent, lineIndex: number) => {
+    const currentLineRef = lineRefs.current[lineIndex];
+    currentLineRef.focus();
 
     // Get cursor position from selection
     const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0) return;
+    if (!selection) return;
 
-    setActiveColumnIndex(selection.anchorOffset);
+    setActiveRowIndex(lineIndex);
+    setActiveColumnIndex(selection.focusOffset);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent, lineIndex: number) => {
+    const currentLineRef = lineRefs.current[lineIndex];
+    const selection = window.getSelection();
+    if (!selection || selection.isCollapsed) return;
+
+    setActiveColumnIndex(selection.focusOffset);
+    if (currentLineRef === selectionRange?.startContainer.parentElement) {
+      setActiveRowIndex(lineIndex);
+    }
+
+    const range = selection.getRangeAt(0);
+    setSelectionRange(range);
   };
 
   return (
-    <div id="yazmak-editor" ref={editorRef}>
-      <div id="yazmak-editor-content">
-        <div id="yazmak-vim-cursor" />
-        {lines.map((line, index) => (
-          <div className="yazmak-line">
-            {showLineNumbers && (
-              <div className="yazmak-line-number">{index + 1}</div>
-            )}
-
+    <div id="yazmak-editor">
+      <div
+        id="yazmak-editor-area"
+        contentEditable={false}
+        suppressContentEditableWarning={false}
+        ref={editorRef}
+      >
+        {showLineNumbers && (
+          <div id="yazmak-editor-lines" contentEditable={false}>
+            {lines.map((_, index) => (
+              <div
+                ref={(el) => {
+                  if (!el) return;
+                  lineNumberRefs.current[index] = el;
+                }}
+                className="yazmak-line-number"
+                key={`yazmak-line-${index}`}
+              >
+                {index + 1}
+              </div>
+            ))}
+          </div>
+        )}
+        <div id="yazmak-editor-content">
+          <div id="yazmak-vim-cursor" />
+          {lines.map((line, index) => (
             <div
               className="yazmak-line-content"
+              style={{ gridRow: index + 1 }}
               key={`yazmak-line-${index}`}
               ref={(el) => {
                 if (!el) return;
@@ -368,14 +395,16 @@ function CustomEditor({
               suppressContentEditableWarning={true}
               onKeyDown={(e) => handleKeyDown(e)}
               onInput={(e) => handleLineInput(e, index)}
-              onClick={() => handleLineClick(index)}
+              onClick={(e) => handleLineClick(e, index)}
+              onMouseDown={(e) => handleMouseDown(e, index)}
+              onMouseUp={(e) => handleMouseUp(e, index)}
+              onMouseMove={(e) => handleMouseMove(e, index)}
               data-line-index={index}
-              spellCheck={false}
             >
               {line}
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
       <div className="status-line">
         <span>

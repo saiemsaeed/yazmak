@@ -1,6 +1,7 @@
 import { CursorHandlerReturnType } from "../types/handlers";
 
 const handleMoveUp = (
+  lineRefs: HTMLDivElement[],
   lines: string[],
   activeRowIndex: number,
   activeColumnIndex: number,
@@ -17,6 +18,7 @@ const handleMoveUp = (
 };
 
 const handleMoveDown = (
+  lineRefs: HTMLDivElement[],
   lines: string[],
   activeRowIndex: number,
   activeColumnIndex: number,
@@ -33,6 +35,7 @@ const handleMoveDown = (
 };
 
 const handleCreateNewLine = (
+  lineRefs: HTMLDivElement[],
   lines: string[],
   activeRowIndex: number,
   activeColumnIndex: number,
@@ -41,6 +44,7 @@ const handleCreateNewLine = (
   const newLines = [...lines];
   const newLine = newLines[activeRowIndex];
   const remainingContent = newLine.slice(0, activeColumnIndex);
+
   const newContent = newLine.slice(activeColumnIndex);
 
   newLines[activeRowIndex] = remainingContent;
@@ -54,10 +58,14 @@ const handleCreateNewLine = (
 };
 
 const handleDeleteLine = (
+  lineRefs: HTMLDivElement[],
   lines: string[],
   activeRowIndex: number,
   activeColumnIndex: number,
 ): CursorHandlerReturnType => {
+  if (activeRowIndex === 0 && activeColumnIndex === 0) {
+    return { rowIndex: activeRowIndex, columnIndex: activeColumnIndex, lines };
+  }
   const newRowIndex = Math.max(0, activeRowIndex - 1);
   const newRows = [...lines];
   const newRow = newRows[newRowIndex];
@@ -76,6 +84,7 @@ const handleDeleteLine = (
 };
 
 const handleMoveLeft = (
+  lineRefs: HTMLDivElement[],
   lines: string[],
   activeRowIndex: number,
   activeColumnIndex: number,
@@ -103,6 +112,7 @@ const handleMoveLeft = (
 };
 
 const handleMoveRight = (
+  lineRefs: HTMLDivElement[],
   lines: string[],
   activeRowIndex: number,
   activeColumnIndex: number,
@@ -126,6 +136,7 @@ const handleMoveRight = (
 };
 
 const handleMoveNextWord = (
+  lineRefs: HTMLDivElement[],
   lines: string[],
   activeRowIndex: number,
   activeColumnIndex: number,
@@ -156,6 +167,7 @@ const handleMoveNextWord = (
 };
 
 const handleMovePrevWord = (
+  lineRefs: HTMLDivElement[],
   lines: string[],
   activeRowIndex: number,
   activeColumnIndex: number,
@@ -183,6 +195,7 @@ const handleMovePrevWord = (
 };
 
 const handleDeleteWordBackwards = (
+  lineRefs: HTMLDivElement[],
   lines: string[],
   activeRowIndex: number,
   activeColumnIndex: number,
@@ -213,6 +226,7 @@ const handleDeleteWordBackwards = (
 };
 
 const handleDeleteWordForward = (
+  lineRefs: HTMLDivElement[],
   lines: string[],
   activeRowIndex: number,
   activeColumnIndex: number,

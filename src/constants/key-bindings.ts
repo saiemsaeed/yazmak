@@ -6,7 +6,7 @@ export const KEY_BINDINGS: IKEYBINDINGS = {
   MOVE_LEFT: "ArrowLeft",
   MOVE_RIGHT: "ArrowRight",
   NEW_LINE: "Enter",
-  DELETE_LINE: "Backspace",
+  DELETE: "Backspace",
   MOVE_NEXT_WORD: "Alt+ArrowRight",
   MOVE_PREV_WORD: "Alt+ArrowLeft",
   MOVE_START_LINE: "Home",
@@ -15,4 +15,7 @@ export const KEY_BINDINGS: IKEYBINDINGS = {
   CHANGE_MODE_INSERT: "i",
   DELETE_WORD_BACKWARDS: "Alt+Backspace",
   DELETE_WORD_FORWARD: "Alt+Delete",
+  SELECT_ALL: "Meta+a",
+  COPY: "Meta+c",
+  PASTE: "Meta+v",
 };
