@@ -91,16 +91,16 @@ function CustomEditor({
 
     // Remove active line class from all Lines
     lineRefs.current.forEach((lineRef) =>
-      lineRef.classList.remove("yazmak-active-line"),
+      lineRef?.classList.remove("yazmak-active-line"),
     );
 
     // Remove active line class from all Line numbers
     lineNumberRefs.current.forEach((lineNumberRef) =>
-      lineNumberRef.classList.remove("yazmak-active-line"),
+      lineNumberRef?.classList.remove("yazmak-active-line"),
     );
 
-    activeLineRef.classList.add("yazmak-active-line");
-    activeLineNumberRef.classList.add("yazmak-active-line");
+    activeLineRef?.classList.add("yazmak-active-line");
+    activeLineNumberRef?.classList.add("yazmak-active-line");
   }, [activeRowIndex]);
 
   useEffect(() => {

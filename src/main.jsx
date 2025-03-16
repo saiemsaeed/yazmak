@@ -36,7 +36,7 @@ createRoot(document.getElementById("root")).render(
         <Editor
           initialText={initialText}
           config={{
-            showLineNumbers: true,
+            showLineNumbers: false,
           }}
         />
       </div>
