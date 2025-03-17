@@ -20,11 +20,13 @@ import { handleSelectAll } from "./helpers/selection";
 type Config = {
   showLineNumbers: boolean;
   vimMode: boolean;
+  showStatusbar?: boolean;
 };
 
 type CustomEditorProps = {
   initialText: string;
   config?: Config;
+  lineRenderer: (line: string, index: number, isRaw: boolean) => any;
 };
 
 const EDITOR_MODES = {
@@ -35,9 +37,13 @@ const EDITOR_MODES = {
 function CustomEditor({
   initialText,
   config = { showLineNumbers: false, vimMode: false },
+  lineRenderer,
 }: CustomEditorProps) {
-  const { showLineNumbers } = config;
-  const [lines, setLines] = useState<string[]>(initialText.split("\n"));
+  const { showLineNumbers, showStatusbar = false } = config;
+
+  const [lines, setLines] = useState<string[]>(
+    initialText.split("\n").map((line) => line.trimEnd()),
+  );
   const [activeRowIndex, setActiveRowIndex] = useState<number>(0);
   const [activeColumnIndex, setActiveColumnIndex] = useState<number>(0);
   const editorRef = useRef<HTMLDivElement>(null);
@@ -45,6 +51,10 @@ function CustomEditor({
   const lineNumberRefs = useRef<HTMLDivElement[]>([]);
   const [editorMode, setEditorMode] = useState(EDITOR_MODES.INSERT);
   const [selectionRange, setSelectionRange] = useState<Range | null>(null);
+
+  useEffect(() => {
+    console.log("lines", lines);
+  }, [lines]);
 
   // Focus cursor at the end of content when editor initializes
   useLayoutEffect(() => {
@@ -117,16 +127,71 @@ function CustomEditor({
       const selection = window.getSelection();
       if (!selection) return;
       const range = document.createRange();
+      if (!range) return;
 
-      if (activeLineRef.textContent && activeLineRef.firstChild) {
-        // If there's text content
+      // Helper function to find the appropriate text node and offset
+      const findTextNodeAndOffset = (
+        element: Node,
+        targetOffset: number,
+      ): { node: Node; offset: number } => {
+        // Handle empty element case
+        if (!element.textContent || element.textContent.length === 0) {
+          return { node: element, offset: 0 };
+        }
+
+        // If this is a text node, return it directly
+        if (element.nodeType === Node.TEXT_NODE) {
+          return {
+            node: element,
+            offset: Math.min(targetOffset, element.textContent.length),
+          };
+        }
+
+        // Navigate through child nodes
+        let currentOffset = 0;
+        for (let i = 0; i < element.childNodes.length; i++) {
+          const child = element.childNodes[i];
+          const childLength = child.textContent?.length || 0;
+
+          // If target position is in this child node
+          if (currentOffset + childLength >= targetOffset) {
+            // If it's a text node, position cursor within it
+            if (child.nodeType === Node.TEXT_NODE) {
+              return {
+                node: child,
+                offset: targetOffset - currentOffset,
+              };
+            }
+            // Otherwise, recursively find position in this child
+            return findTextNodeAndOffset(child, targetOffset - currentOffset);
+          }
+
+          currentOffset += childLength;
+        }
+
+        // If we get here, position at the end of the last text node
+        const lastChild = element.lastChild;
+        if (lastChild?.nodeType === Node.TEXT_NODE) {
+          return {
+            node: lastChild,
+            offset: lastChild.textContent?.length || 0,
+          };
+        }
+
+        // Fall back to the element itself
+        return { node: element, offset: 0 };
+      };
+
+      if (activeLineRef.textContent) {
+        // If there's text content, find the appropriate position
         const position = Math.min(
           activeColumnIndex,
           activeLineRef.textContent.length || 0,
         );
 
-        range.setStart(activeLineRef.firstChild, position);
-        range.setEnd(activeLineRef.firstChild, position);
+        const { node, offset } = findTextNodeAndOffset(activeLineRef, position);
+        range.setStart(node, offset);
+        range.setEnd(node, offset);
       } else {
         // If there's no text content
         range.setStart(activeLineRef, 0);
@@ -400,17 +465,20 @@ function CustomEditor({
               onMouseUp={(e) => handleMouseUp(e, index)}
               onMouseMove={(e) => handleMouseMove(e, index)}
               data-line-index={index}
-            >
-              {line}
-            </div>
+              dangerouslySetInnerHTML={{
+                __html: lineRenderer(line, index, index === activeRowIndex),
+              }}
+            />
           ))}
         </div>
       </div>
-      <div className="status-line">
-        <span>
-          {editorMode} | Column: {activeColumnIndex} Row: {activeRowIndex}
-        </span>
-      </div>
+      {showStatusbar && (
+        <div className="status-line">
+          <span>
+            {editorMode} | Column: {activeColumnIndex} Row: {activeRowIndex}
+          </span>
+        </div>
+      )}
     </div>
   );
 }

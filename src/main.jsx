@@ -2,15 +2,33 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import Editor from "./CustomEditor";
 import "./index.css";
+import { marked } from "marked";
 
-const initialText = `This is the Testing Initial Text
+const initialText = `## This is the Testing Initial Text
 ## This is the Heading 2
-### this is the heading 3
+this is the heading 3
 
 
 
 
 `;
+
+const rawRenderer = new marked.Renderer();
+rawRenderer.heading = (props) => {
+  console.log(JSON.stringify(props, null, 2));
+  const { text, depth, raw } = props;
+  return `<h${depth}>${raw}</h${depth}>`;
+};
+
+const lineRenderer = (line, lineNumber, isRaw) => {
+  if (isRaw) {
+    const renderedLine = marked.parse(line, { renderer: rawRenderer });
+    return renderedLine;
+  }
+
+  const renderedLine = marked.parse(line);
+  return renderedLine;
+};
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -36,8 +54,10 @@ createRoot(document.getElementById("root")).render(
         <Editor
           initialText={initialText}
           config={{
-            showLineNumbers: false,
+            showLineNumbers: true,
+            showStatusbar: false,
           }}
+          lineRenderer={lineRenderer}
         />
       </div>
     </div>

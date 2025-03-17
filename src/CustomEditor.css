@@ -1,6 +1,17 @@
 @import url("./themes/default-gruvbox.css");
 /* @import url("./themes/one-light-atom.css"); */
 
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  font-family: var(--yazmak-font-serif);
+  margin: 0;
+}
+
 #yazmak-editor {
   display: flex;
   flex-direction: column;
@@ -24,7 +35,7 @@
 
 /* When line numbers are present, ensure minimum width */
 #yazmak-editor-area:has(.yazmak-line-number) {
-  grid-template-columns: [ln-col] minmax(30px, auto) [content-col] 1fr;
+  grid-template-columns: [ln-col] minmax(24px, auto) [content-col] 1fr;
 }
 
 #yazmak-editor-lines,
@@ -52,6 +63,7 @@
   padding: 0 4px;
   grid-column: ln-col;
   user-select: none;
+  font-size: 12px;
 }
 
 .yazmak-line-content {
@@ -64,6 +76,7 @@
   white-space: pre-wrap; /* Preserve whitespace */
   cursor: text;
   grid-column: content-col;
+  display: flex;
 }
 
 .status-line {
