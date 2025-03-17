@@ -16,7 +16,7 @@ this is the heading 3
 const rawRenderer = new marked.Renderer();
 rawRenderer.heading = (props) => {
   console.log(JSON.stringify(props, null, 2));
-  const { text, depth, raw } = props;
+  const { depth, raw } = props;
   return `<h${depth}>${raw}</h${depth}>`;
 };
 

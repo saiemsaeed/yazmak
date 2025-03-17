@@ -1,7 +1,7 @@
 import { CursorHandlerReturnType } from "../types/handlers";
 
 const handleMoveUp = (
-  lineRefs: HTMLDivElement[],
+  _lineRefs: HTMLDivElement[],
   lines: string[],
   activeRowIndex: number,
   activeColumnIndex: number,
@@ -18,7 +18,7 @@ const handleMoveUp = (
 };
 
 const handleMoveDown = (
-  lineRefs: HTMLDivElement[],
+  _lineRefs: HTMLDivElement[],
   lines: string[],
   activeRowIndex: number,
   activeColumnIndex: number,
@@ -35,7 +35,7 @@ const handleMoveDown = (
 };
 
 const handleCreateNewLine = (
-  lineRefs: HTMLDivElement[],
+  _lineRefs: HTMLDivElement[],
   lines: string[],
   activeRowIndex: number,
   activeColumnIndex: number,
@@ -58,7 +58,7 @@ const handleCreateNewLine = (
 };
 
 const handleDeleteLine = (
-  lineRefs: HTMLDivElement[],
+  _lineRefs: HTMLDivElement[],
   lines: string[],
   activeRowIndex: number,
   activeColumnIndex: number,
@@ -84,7 +84,7 @@ const handleDeleteLine = (
 };
 
 const handleMoveLeft = (
-  lineRefs: HTMLDivElement[],
+  _lineRefs: HTMLDivElement[],
   lines: string[],
   activeRowIndex: number,
   activeColumnIndex: number,
@@ -112,7 +112,7 @@ const handleMoveLeft = (
 };
 
 const handleMoveRight = (
-  lineRefs: HTMLDivElement[],
+  _lineRefs: HTMLDivElement[],
   lines: string[],
   activeRowIndex: number,
   activeColumnIndex: number,
@@ -136,7 +136,7 @@ const handleMoveRight = (
 };
 
 const handleMoveNextWord = (
-  lineRefs: HTMLDivElement[],
+  __lineRefs: HTMLDivElement[],
   lines: string[],
   activeRowIndex: number,
   activeColumnIndex: number,
@@ -167,7 +167,7 @@ const handleMoveNextWord = (
 };
 
 const handleMovePrevWord = (
-  lineRefs: HTMLDivElement[],
+  _lineRefs: HTMLDivElement[],
   lines: string[],
   activeRowIndex: number,
   activeColumnIndex: number,
@@ -195,7 +195,7 @@ const handleMovePrevWord = (
 };
 
 const handleDeleteWordBackwards = (
-  lineRefs: HTMLDivElement[],
+  _lineRefs: HTMLDivElement[],
   lines: string[],
   activeRowIndex: number,
   activeColumnIndex: number,
@@ -226,7 +226,7 @@ const handleDeleteWordBackwards = (
 };
 
 const handleDeleteWordForward = (
-  lineRefs: HTMLDivElement[],
+  _lineRefs: HTMLDivElement[],
   lines: string[],
   activeRowIndex: number,
   activeColumnIndex: number,
