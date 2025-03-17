@@ -380,11 +380,11 @@ function CustomEditor({
     }
   };
 
-  const handleMouseDown = (e: React.MouseEvent, lineIndex: number) => {
+  const handleMouseDown = (_e: React.MouseEvent, _lineIndex: number) => {
     editorRef.current?.setAttribute("contentEditable", "true");
   };
 
-  const handleMouseUp = (e: React.MouseEvent, lineIndex: number) => {
+  const handleMouseUp = (_e: React.MouseEvent, lineIndex: number) => {
     editorRef.current?.setAttribute("contentEditable", "false");
     const selection = window.getSelection();
     if (!selection) {
@@ -395,7 +395,7 @@ function CustomEditor({
     setActiveColumnIndex(selection.focusOffset);
   };
 
-  const handleLineClick = (e: React.MouseEvent, lineIndex: number) => {
+  const handleLineClick = (_e: React.MouseEvent, lineIndex: number) => {
     const currentLineRef = lineRefs.current[lineIndex];
     currentLineRef.focus();
 
@@ -407,7 +407,7 @@ function CustomEditor({
     setActiveColumnIndex(selection.focusOffset);
   };
 
-  const handleMouseMove = (e: React.MouseEvent, lineIndex: number) => {
+  const handleMouseMove = (_e: React.MouseEvent, lineIndex: number) => {
     const currentLineRef = lineRefs.current[lineIndex];
     const selection = window.getSelection();
     if (!selection || selection.isCollapsed) return;
