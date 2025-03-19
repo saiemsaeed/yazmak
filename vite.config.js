@@ -29,9 +29,11 @@ export default defineConfig({
           react: "React",
           "react-dom": "ReactDOM",
         },
+        assetFileNames: "assets/[name][extname]",
       },
     },
     sourcemap: true,
     emptyOutDir: true,
+    cssCodeSplit: false,
   },
 });

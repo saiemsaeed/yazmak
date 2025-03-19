@@ -1,6 +1,5 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { KEY_BINDINGS } from "./constants/key-bindings";
-import "./CustomEditor.css";
 import {
   handleCreateNewLine,
   handleDeleteLine,
@@ -16,6 +15,8 @@ import {
 import { createKeyMap } from "./helpers/global";
 import { copyToClipboard, pasteFromClipboard } from "./helpers/clipboard";
 import { handleSelectAll } from "./helpers/selection";
+
+import "./CustomEditor.css";
 
 type Config = {
   showLineNumbers: boolean;

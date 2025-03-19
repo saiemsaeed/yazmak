@@ -1,3 +1,6 @@
+// Export the CSS directly
+import "./CustomEditor.css";
+
 // Export your main component(s)
 export { default as CustomEditor } from "./CustomEditor";
 

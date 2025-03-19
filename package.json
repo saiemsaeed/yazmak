@@ -1,6 +1,6 @@
 {
   "name": "yazmak",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A minimalist web-based text editor built with React, featuring Vim keybindings.",
   "type": "module",
   "main": "dist/index.js",
@@ -13,7 +13,8 @@
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
-    }
+    },
+    "./style.css": "./dist/style.css"
   },
   "sideEffects": false,
   "scripts": {
