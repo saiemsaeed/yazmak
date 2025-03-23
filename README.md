@@ -16,11 +16,23 @@ Yazmak is a modern, lightweight text editor designed for simplicity and ease of 
 - 🎨 Minimalist design philosophy
 - ⚡ Fast and lightweight performance
 
+# Yazmak
+
+A minimalist web-based text editor built with React, featuring Vim keybindings.
+
 ## Installation
 
 ```bash
+npm install yazmak
+# or
+yarn add yazmak
+```
+
+## Contribution
+
+```bash
 # Clone the repository
-git clone https://github.com/yourusername/yazmak.git
+git clone https://github.com/saiemsaeed/yazmak.git
 
 # Navigate to the project directory
 cd yazmak
@@ -30,4 +42,21 @@ yarn install
 
 # Start the development server
 yarn dev
+```
+
+## Usage
+
+```jsx
+import { CustomEditor } from "yazmak";
+import "yazmak/style.css"; // Important: import the styles
+
+function App() {
+  return (
+    <CustomEditor
+      initialText="# Hello World"
+      lineRenderer={(line) => line}
+      config={{ showLineNumbers: true }}
+    />
+  );
+}
 ```
