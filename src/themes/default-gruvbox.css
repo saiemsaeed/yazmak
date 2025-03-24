@@ -1,11 +1,12 @@
 :root {
+  font-size: 10px;
   --yazmak-editor-background: #282828;
   --yazmak-editor-text-color: #fbf1c7;
   --yazmak-active-color: #fabd2f;
   --yazmak-font-sans: "Inter", sans-serif;
   --yazmak-font-mono: "JetBrains Mono", monospace;
 
-  --yazmak-base-font-size: 1rem;
+  --yazmak-base-font-size: 1.8rem;
 
   --yazmak-heading-1-font-size: 2.5rem;
   --yazmak-heading-2-font-size: 2rem;
